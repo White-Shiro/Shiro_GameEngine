@@ -19,6 +19,9 @@ struct UtfUtil {
 						static void append(StringW&     dst, StrView  view) { _append(dst, view); }
 						static void append(StringW&     dst, StrViewW view) { _append(dst, view); }
 
+	template<class SRC>	static String  toString(SRC& src) { String  o; convert(o, src); return o; }
+	template<class SRC>	static StringW toStringW(SRC& src) { StringW o; convert(o, src); return o; }
+
 private:
 	static uint32_t _decodeUtf(const char*&     src, const char*     end);
 	static uint32_t _decodeUtf(const char16_t*& src, const char16_t* end);

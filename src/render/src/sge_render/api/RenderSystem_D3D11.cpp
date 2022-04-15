@@ -2,20 +2,38 @@
 
 //Private Func
 void sge::RenderSystem_D3D11::_initPipeline() {
-	// load and compile the two shaders
 
 	SGE_LOG("Initing PipeLine");
 
-	ID3D10Blob* VS, * PS;
+	// load and compile the two shaders
+	ID3D10Blob *VS, *PS = nullptr;
+	ID3D10Blob* errorMessages = nullptr;
 
-	D3DCompileFromFile(L"sge_render/api/shaders.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, 0);
-	D3DCompileFromFile(L"sge_render/api/shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, 0);
+	HRESULT hr;
 
-	SGE_LOG("FoundShader");
+	const wchar_t* shaderFile = L"Asset/Shaders/shaders.shader";
+
+	hr = D3DCompileFromFile(shaderFile, 0, 0, "VShader", "vs_4_0", 0, 0, &VS, &errorMessages);
+
+	if (FAILED(hr) && !errorMessages) {
+		//SGE_LOG("Failed compiling vertex shader %08X\n", hr);
+		printf("Failed compiling vertex shader %08X\n", hr); //TODO DirectX errorMsg handleing
+		return;
+	}
+
+	hr = D3DCompileFromFile(shaderFile, 0, 0, "PShader", "ps_4_0", 0, 0, &PS, 0);
+
+	if (FAILED(hr) && !errorMessages) {
+		//SGE_LOG("Failed compiling vertex shader %08X\n", hr);
+		printf("Failed compiling pixel shader %08X\n", hr); //TODO DirectX errorMsg handleing
+		return;
+	}
 
 	// encapsulate both shaders into shader objects
 	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);
 	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pPS);
+
+
 
 	// set the shader objects
 	devcon->VSSetShader(pVS, 0, 0);
@@ -31,6 +49,7 @@ void sge::RenderSystem_D3D11::_initPipeline() {
 	devcon->IASetInputLayout(pLayout);
 
 	SGE_LOG("D3D11 Render PipeLine initialized...\n");
+
 }
 
 void sge::RenderSystem_D3D11::_initGraphics() {
@@ -54,7 +73,9 @@ void sge::RenderSystem_D3D11::_initGraphics() {
 
 	// copy the vertices into the buffer
 	D3D11_MAPPED_SUBRESOURCE ms;
-	SGE_Bzero(ms);
+	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+
+	//SGE_Bzero(ms);
 
 	devcon->Map(pVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
 	memcpy(ms.pData, OurVertices, sizeof(OurVertices));                 // copy the data
@@ -68,7 +89,10 @@ void sge::RenderSystem_D3D11::onInit3D(HWND& Hwnd) {
 
 	// create a struct to hold information about the swap chain
 	DXGI_SWAP_CHAIN_DESC scd;
-	SGE_Bzero(scd);
+
+	ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
+
+	//SGE_Bzero(scd);
 
 	int ScreenW = 800; //TODO GetFromCurrentWinWidth
 	int ScreenH = 600; //TODO GetFromCurrentWinHeight
@@ -85,18 +109,11 @@ void sge::RenderSystem_D3D11::onInit3D(HWND& Hwnd) {
 	scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;     // allow full-screen switching
 
 	// create a device, device context and swap chain using the information in the scd struct
-	D3D11CreateDeviceAndSwapChain(NULL,
-		D3D_DRIVER_TYPE_HARDWARE,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		D3D11_SDK_VERSION,
-		&scd,
-		&swapchain,
-		&dev,
-		NULL,
-		&devcon);
+
+	D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE,
+		NULL, NULL, NULL, NULL, D3D11_SDK_VERSION,
+		&scd, &swapchain, &dev, NULL, &devcon
+	);
 
 	// get the address of the back buffer
 	ID3D11Texture2D* pBackBuffer;

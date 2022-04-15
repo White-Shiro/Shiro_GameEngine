@@ -30,17 +30,17 @@ namespace sge {
 		struct VERTEX { FLOAT X, Y, Z; COLOR color; };
 
 		//COM Objects, must be released when clean up
-		IDXGISwapChain*			swapchain;			// the pointer to the swap chain interface
-		ID3D11Device*			dev;				// the pointer to our Direct3D device interface
-		ID3D11DeviceContext*	devcon;				// the pointer to our Direct3D device context
-		ID3D11RenderTargetView*	backbuffer;			// the pointer to our BackBuffer
+		IDXGISwapChain*			swapchain;		// the pointer to the swap chain interface
+		ID3D11Device*			dev;			// the pointer to our Direct3D device interface
+		ID3D11DeviceContext*	devcon;			// the pointer to our Direct3D device context
+		ID3D11RenderTargetView*	backbuffer;		// the pointer to our BackBuffer
 
-		ID3D11InputLayout*		pLayout;			// the pointer of inputLayer
-		ID3D11Buffer*			pVBuffer;			// the pointer of vertex buffer
+		ID3D11InputLayout*		pLayout;		// the pointer of inputLayer
+		ID3D11Buffer*			pVBuffer;		// the pointer of vertex buffer
 
 		// Shader
-		ID3D11VertexShader*		pVS;				// the pointer of vertex shader
-		ID3D11PixelShader*		pPS;				// the pointer of pixel shader
+		ID3D11VertexShader*		pVS;			// the pointer of vertex shader
+		ID3D11PixelShader*		pPS;			// the pointer of pixel shader
 
 		void _initGraphics();
 		void _initPipeline();
