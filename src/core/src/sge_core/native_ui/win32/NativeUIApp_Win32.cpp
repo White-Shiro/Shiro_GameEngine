@@ -6,59 +6,48 @@
 
 namespace sge {
 
-void NativeUIApp_Win32::onCreate(CreateDesc& desc) {
-	Base::onCreate(desc);
-}
-
-void NativeUIApp_Win32::onRun() {
-	Base::onRun();
-
-	while (TRUE) {
-		if (PeekMessage(&_win32_msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&_win32_msg);
-			DispatchMessage(&_win32_msg);
-
-			if (_win32_msg.message == WM_QUIT)
-				break;
-		} else {
-			// Run game code here
-			onUpdate();
-			onLateUpdate();
-		}
+	void NativeUIApp_Win32::onCreate(CreateDesc& desc) {
+		Base::onCreate(desc);
 	}
 
-	willQuit();
-}
+	void NativeUIApp_Win32::onRun() {
+		Base::onRun();
 
-void NativeUIApp_Win32::onQuit() {
-	Base::onQuit();
+		while (GetMessage(&_win32_msg, NULL, 0, 0)) {
+			TranslateMessage(&_win32_msg);
+			DispatchMessage(&_win32_msg);
+		}
 
-	::PostQuitMessage(_exitCode);
-}
+		willQuit();
+	}
 
-String NativeUIApp_Win32::onGetExecutableFilename() {
-	wchar_t tmp[MAX_PATH + 1];
-	if (!::GetModuleFileName(nullptr, tmp, MAX_PATH))
-		throw SGE_ERROR("");
+	void NativeUIApp_Win32::onQuit() {
+		Base::onQuit();
 
-	String o = UtfUtil::toString(tmp);
-	return o;
-}
+		::PostQuitMessage(_exitCode);
+	}
 
-String NativeUIApp_Win32::onGetCurrentDir() {
-	wchar_t tmp[MAX_PATH + 1];
-	if (!::GetCurrentDirectory(MAX_PATH, tmp))
-		throw SGE_ERROR("getCurrentDir");
-	String o = UtfUtil::toString(tmp);
-	return o;
-}
+	String NativeUIApp_Win32::onGetExecutableFilename() {
+		wchar_t tmp[MAX_PATH + 1];
+		if (!::GetModuleFileName(nullptr, tmp, MAX_PATH))
+			throw SGE_ERROR("");
 
-void NativeUIApp_Win32::onSetCurrentDir(StrView dir) {
-	TempStringW tmp = UtfUtil::toStringW(dir);
-	::SetCurrentDirectory(tmp.c_str());
-}
+		String o = UtfUtil::toString(tmp);
+		return o;
+	}
 
+	String NativeUIApp_Win32::onGetCurrentDir() {
+		wchar_t tmp[MAX_PATH + 1];
+		if (!::GetCurrentDirectory(MAX_PATH, tmp))
+			throw SGE_ERROR("getCurrentDir");
+		String o = UtfUtil::toString(tmp);
+		return o;
+	}
 
+	void NativeUIApp_Win32::onSetCurrentDir(StrView dir) {
+		TempStringW tmp = UtfUtil::toStringW(dir);
+		::SetCurrentDirectory(tmp.c_str());
+	}
 
 }
 

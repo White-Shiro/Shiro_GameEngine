@@ -3,75 +3,57 @@
 
 namespace sge {
 
-class MainWin : public NativeUIWindow {
-	using Base = NativeUIWindow;
-public:
-	void onCreate(CreateDesc& desc) {
-		Base::onCreate(desc);
-	}
+	class MainWin : public NativeUIWindow {
+		using Base = NativeUIWindow;
+	public:
+		void onCreate(CreateDesc& desc) {
 
-	virtual void onCloseButton() override {
-		NativeUIApp::current()->quit(0);
-	}
-};
+			Base::onCreate(desc);
+			auto* renderer = Renderer::current();
 
-class EditorApp : public NativeUIApp {
-	using Base = NativeUIApp;
-public:
-	virtual void onCreate(CreateDesc& desc) override {
-		{
-			String file = getExecutableFilename();
-			String path = FilePath::getDir(file);
+		}
 
-			auto testdir = getCurrentDir();
-			SGE_LOG("dir = {}", testdir);
+		virtual void onCloseButton() override {
+			NativeUIApp::current()->quit(0);
+		}
+	};
 
-			path.append("../../../../../../../");
-			setCurrentDir(path);
+	class EditorApp : public NativeUIApp {
+		using Base = NativeUIApp;
+	public:
+		virtual void onCreate(CreateDesc& desc) override {
+			{
+				String file = getExecutableFilename();
+				String path = FilePath::getDir(file);
 
-			auto dir = getCurrentDir();
-			SGE_LOG("dir = {}", dir);
-		} //Change Working Directory
+				auto testdir = getCurrentDir();
+				SGE_LOG("dir = {}", testdir);
 
-		Base::onCreate(desc);
+				path.append("../../../../../../../");
+				setCurrentDir(path);
 
-		NativeUIWindow::CreateDesc winDesc;
-		winDesc.isMainWindow = true;
-		_mainWin.create(winDesc);
-		_mainWin.setWindowTitle("SGE Editor_Shiro");
+				auto dir = getCurrentDir();
+				SGE_LOG("dir = {}", dir);
+			}  //Change Working Directory
 
-		//Atleast Working :(
-		_renderer = new RenderSystem_D3D11();
-		_renderer->init3D(_mainWin._hwnd);
+			Base::onCreate(desc);
 
-	}
+			//Renderer Create
+			Renderer::CreateDesc renderDesc;
+			Renderer::create(renderDesc);
 
-	virtual void onUpdate() override {
-		Base::onUpdate();
-		//Game Logic Update
-	}
+			//MainWin Create
+			NativeUIWindow::CreateDesc winDesc;
+			winDesc.isMainWindow = true;
+			_mainWin.create(winDesc);
+			_mainWin.setWindowTitle("SGE Editor_Shiro");
 
-	virtual void onLateUpdate() override {
-		Base::onLateUpdate();
+		}
 
-		//Render when all logic is done
-		_renderer->render();
-	}
+	private:
+		MainWin			_mainWin;
 
-	virtual void willQuit() override {
-		// clean Renderer before app quit
-		_renderer->clean3D();
-	}
-
-	virtual void onQuit() override {
-		Base::onQuit();
-	}
-
-private:
-	MainWin			_mainWin;
-	RenderSystem*	_renderer;
-	//Renderer*		_renderer;
-};
+	};
 
 }
 
