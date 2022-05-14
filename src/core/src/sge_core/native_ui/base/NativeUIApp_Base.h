@@ -4,16 +4,17 @@ namespace sge {
 
 class NativeUIApp_Base : public NonCopyable {
 public:
-	class CreateDesc {};
+	class CreateDesc {
+	};
 
-	int  run(CreateDesc& desc);
-	void quit(int returnCode);
+			int  run(CreateDesc& desc);
+			void quit(int returnCode);
 	virtual void willQuit() {}
 
-	void	setCurrentDir(StrView dir) { onSetCurrentDir(dir); }
-	String	getCurrentDir() { return onGetCurrentDir(); }
+	void	setCurrentDir(StrView dir)	{ onSetCurrentDir(dir); }
+	String	getCurrentDir()				{ return onGetCurrentDir(); }
 
-	String	getExecutableFilename() { return onGetExecutableFilename(); }
+	String	getExecutableFilename()		{ return onGetExecutableFilename(); }
 
 protected:
 	virtual String	onGetExecutableFilename() = 0;
@@ -23,9 +24,6 @@ protected:
 	virtual void onCreate(CreateDesc& desc) {}
 	virtual void onRun() {}
 	virtual	void onQuit() {}
-
-	virtual void onUpdate() {}
-	virtual void onLateUpdate() {}
 
 	int _exitCode = 0;
 };

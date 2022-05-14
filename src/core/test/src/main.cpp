@@ -11,33 +11,33 @@
 
 namespace sge {
 
-	void run_temp_test() {
-		RUN_TEST(test_UtfUtil);
-	}
-	
-	void run_all_test() {
-	// base
-		RUN_TEST(test_BinSerializer);
-	
-	// string
-		RUN_TEST(test_Fmt);
-		RUN_TEST(test_UtfUtil);
-	
-	// net
-		RUN_TEST(test_Socket);
-	}
-	
-	int test_main() {
-	#if 1
-		run_temp_test();
-	#else
-		run_all_test();
-	#endif
-		// TODO: check memory leak
+void run_temp_test() {
+	RUN_TEST(test_UtfUtil);
+}
 
-		SGE_LOG("\n\n==== Program Ended ==== \n");
-		return 0;
-	}
+void run_all_test() {
+// base
+	RUN_TEST(test_BinSerializer);
+
+// string
+	RUN_TEST(test_Fmt);
+	RUN_TEST(test_UtfUtil);
+
+// net
+	RUN_TEST(test_Socket);
+}
+
+int test_main() {
+#if 1
+	run_temp_test();
+#else
+	run_all_test();
+#endif
+	// TODO: check memory leak
+
+	SGE_LOG("\n\n==== Program Ended ==== \n");
+	return 0;
+}
 
 } // namespace
 

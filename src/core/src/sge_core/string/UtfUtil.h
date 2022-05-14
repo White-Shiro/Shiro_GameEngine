@@ -1,13 +1,12 @@
 #pragma once
 
-#include "String.h"
 #include "../base/Error.h"
 
 namespace sge {
 
 struct UtfUtil {
 
-	template<class DST, class SRC> static void convert(DST& dst, SRC& src);
+	template<class DST, class SRC> static void convert(DST& dst, const SRC& src);
 
 	template<size_t N>	static void append(String_<N>&  dst, StrView  view) { _append(dst, view); }
 	template<size_t N>	static void append(String_<N>&  dst, StrViewW view) { _append(dst, view); }
@@ -19,7 +18,7 @@ struct UtfUtil {
 						static void append(StringW&     dst, StrView  view) { _append(dst, view); }
 						static void append(StringW&     dst, StrViewW view) { _append(dst, view); }
 
-	template<class SRC>	static String  toString(SRC& src) { String  o; convert(o, src); return o; }
+	template<class SRC>	static String  toString	(SRC& src) { String  o; convert(o, src); return o; }
 	template<class SRC>	static StringW toStringW(SRC& src) { StringW o; convert(o, src); return o; }
 
 private:
@@ -43,7 +42,7 @@ private:
 };
 
 template<class DST, class SRC> inline
-void UtfUtil::convert(DST& dst, SRC& src) {
+void UtfUtil::convert(DST& dst, const SRC& src) {
 	dst.clear();
 	append(dst, src);
 }

@@ -13,6 +13,7 @@ find_package(fmt CONFIG REQUIRED)
 find_package(GLEW CONFIG REQUIRED)
 find_package(EABase CONFIG REQUIRED)
 find_package(EASTL CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 function(sge_source_group src_path src_files)
 	foreach(FILE ${src_files}) 
@@ -24,6 +25,18 @@ function(sge_source_group src_path src_files)
 	endforeach()
 endfunction()
 
+function(sge_set_target_warning_level target_name)
+	if(MSVC)
+	  target_compile_options(${target_name} PRIVATE /WX)     #warning treated as error
+	  target_compile_options(${target_name} PRIVATE /W4)     #warning level 4
+	  target_compile_options(${target_name} PRIVATE /wd4100) #warning C4100: unreferenced formal parameter in function
+	  target_compile_options(${target_name} PRIVATE /wd4201) #warning C4201: nonstandard extension used: nameless struct/union
+	  target_compile_options(${target_name} PRIVATE /wd4127) #warning C4127: conditional expression is constant
+	else()
+	  target_compile_options(${target_name} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+	endif()
+endfunction()
+
 function(sge_add_library target_name src_path)
 	file(GLOB_RECURSE src_files
 		"${src_path}/src/*.*"
@@ -31,8 +44,9 @@ function(sge_add_library target_name src_path)
 	sge_source_group(${src_path} "${src_files}")
 	
 	add_library(${target_name} ${src_files})	
-	target_precompile_headers(${target_name} PUBLIC src/${target_name}/${target_name}-pch.h)
+	target_precompile_headers(${target_name} PUBLIC src/${target_name}-pch.h)
 	target_include_directories(${target_name} PUBLIC src)
+	sge_set_target_warning_level(${target_name})
 endfunction()
 
 function(sge_add_executable target_name src_path)
@@ -42,7 +56,8 @@ function(sge_add_executable target_name src_path)
 	sge_source_group(${src_path} "${src_files}")
 	
 	add_executable(${target_name} ${src_files})	
-	target_precompile_headers(${target_name} INTERFACE src/${target_name}/${target_name}-pch.h)
+	target_precompile_headers(${target_name} PUBLIC src/${target_name}-pch.h)
+	sge_set_target_warning_level(${target_name})
 endfunction()
 
 #-- core ---
@@ -51,6 +66,7 @@ add_subdirectory(src/core/test)
 
 #-- render --
 add_subdirectory(src/render)
+add_subdirectory(src/render/shader_compiler)
 
 #-- engine
 add_subdirectory(src/engine)

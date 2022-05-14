@@ -6,48 +6,48 @@
 
 namespace sge {
 
-	void NativeUIApp_Win32::onCreate(CreateDesc& desc) {
-		Base::onCreate(desc);
+void NativeUIApp_Win32::onCreate(CreateDesc& desc) {
+	Base::onCreate(desc);
+}
+
+void NativeUIApp_Win32::onRun() {
+	Base::onRun();
+
+	while (GetMessage(&_win32_msg, NULL, 0, 0)) {
+		TranslateMessage(&_win32_msg);
+		DispatchMessage(&_win32_msg);
 	}
 
-	void NativeUIApp_Win32::onRun() {
-		Base::onRun();
+	willQuit();
+}
 
-		while (GetMessage(&_win32_msg, NULL, 0, 0)) {
-			TranslateMessage(&_win32_msg);
-			DispatchMessage(&_win32_msg);
-		}
+void NativeUIApp_Win32::onQuit() {
+	Base::onQuit();
 
-		willQuit();
-	}
+	::PostQuitMessage(_exitCode);
+}
 
-	void NativeUIApp_Win32::onQuit() {
-		Base::onQuit();
+String NativeUIApp_Win32::onGetExecutableFilename() {
+	wchar_t tmp[MAX_PATH + 1];
+	if (!::GetModuleFileName(nullptr, tmp, MAX_PATH))
+		throw SGE_ERROR("");
 
-		::PostQuitMessage(_exitCode);
-	}
+	String o = UtfUtil::toString(tmp);
+	return o;
+}
 
-	String NativeUIApp_Win32::onGetExecutableFilename() {
-		wchar_t tmp[MAX_PATH + 1];
-		if (!::GetModuleFileName(nullptr, tmp, MAX_PATH))
-			throw SGE_ERROR("");
+String NativeUIApp_Win32::onGetCurrentDir() {
+	wchar_t tmp[MAX_PATH+1];
+	if (!::GetCurrentDirectory(MAX_PATH, tmp))
+		throw SGE_ERROR("getCurrentDir");
+	String o = UtfUtil::toString(tmp);
+	return o;
+}
 
-		String o = UtfUtil::toString(tmp);
-		return o;
-	}
-
-	String NativeUIApp_Win32::onGetCurrentDir() {
-		wchar_t tmp[MAX_PATH + 1];
-		if (!::GetCurrentDirectory(MAX_PATH, tmp))
-			throw SGE_ERROR("getCurrentDir");
-		String o = UtfUtil::toString(tmp);
-		return o;
-	}
-
-	void NativeUIApp_Win32::onSetCurrentDir(StrView dir) {
-		TempStringW tmp = UtfUtil::toStringW(dir);
-		::SetCurrentDirectory(tmp.c_str());
-	}
+void NativeUIApp_Win32::onSetCurrentDir(StrView dir) {
+	TempStringW tmp = UtfUtil::toStringW(dir);
+	::SetCurrentDirectory(tmp.c_str());
+}
 
 }
 
