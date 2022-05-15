@@ -1,9 +1,11 @@
 #include <sge_editor.h>
 
 #include <sge_render/mesh/RenderMesh.h>
+#include <sge_render/mesh/WavefrontObjLoader.h>
 #include <sge_render/command/RenderCommand.h>
 #include <sge_render/vertex/Vertex.h>
 #include <sge_render/vertex/VertexLayoutManager.h>
+
 
 namespace sge {
 
@@ -25,8 +27,24 @@ public:
 			_renderContext = renderer->createContext(renderContextDesc);
 		}
 
+		//_material = renderer->createMaterial();
+		//_material = Shader::Find("/Assets/shaders/test.shader");
+		//_material.setParam("a", 10.0f);
+
 		EditMesh editMesh;
 
+	#if 1
+		WavefrontObjLoader::loadFile(editMesh, "Assets/Mesh/test.obj");
+		// the current shader need color
+		for (size_t i = editMesh.color.size(); i < editMesh.pos.size(); i++) {
+			editMesh.color.emplace_back(255, 255, 255, 255);
+		}
+
+		// the current shader has no uv or normal
+		editMesh.uv[0].clear();
+		editMesh.normal.clear();
+
+	#else
 		editMesh.pos.emplace_back( 0.0f,  0.5f, 0.0f);
 		editMesh.pos.emplace_back( 0.5f, -0.5f, 0.0f);
 		editMesh.pos.emplace_back(-0.5f, -0.5f, 0.0f);
@@ -34,6 +52,7 @@ public:
 		editMesh.color.emplace_back(255, 0, 0, 255);
 		editMesh.color.emplace_back(0, 255, 0, 255);
 		editMesh.color.emplace_back(0, 0, 255, 255);
+	#endif
 
 		_renderMesh.create(editMesh);
 
@@ -54,7 +73,7 @@ public:
 
 		_cmdBuf.reset();
 		_cmdBuf.clearFrameBuffers()->setColor({0, 0, 0.2f, 1});
-		_cmdBuf.drawMesh(_renderMesh);
+		_cmdBuf.drawMesh(SGE_LOC, _renderMesh);//, _material);
 		_cmdBuf.swapBuffers();
 		
 		_renderContext->commit(_cmdBuf);
@@ -62,6 +81,8 @@ public:
 		_renderContext->endRender();
 		drawNeeded();
 	}
+
+//	SPtr<Material> _material;
 
 	SPtr<RenderContext>	_renderContext;
 	RenderCommandBuffer _cmdBuf;
@@ -75,27 +96,24 @@ public:
 		{
 			String file = getExecutableFilename();
 			String path = FilePath::getDir(file);
-
-			SGE_LOG("exe.dir = {}", path);
-
-			path.append("/../../../../../../Assets");
+			path.append("/../../../../../../examples/Test101");
 			setCurrentDir(path);
 
 			auto dir = getCurrentDir();
 			SGE_LOG("dir = {}", dir);
 		}
+
 		Base::onCreate(desc);
 
-		//Creat Renderer
 		Renderer::CreateDesc renderDesc;
-		renderDesc.apiType = Renderer::ApiType::DX11;
+		//renderDesc.apiType = OpenGL;
 		Renderer::create(renderDesc);
 
-		//Creat MainWindow
+	//---
 		NativeUIWindow::CreateDesc winDesc;
 		winDesc.isMainWindow = true;
 		_mainWin.create(winDesc);
-		_mainWin.setWindowTitle("Shiro SGE Editor");
+		_mainWin.setWindowTitle("SGE Editor");
 
 	}
 
