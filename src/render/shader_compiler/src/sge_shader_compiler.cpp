@@ -14,8 +14,8 @@ protected:
 			path.append("/../../../../../../examples/Test101");
 			Directory::setCurrent(path);
 
-			auto dir = Directory::getCurrent();
-			SGE_LOG("dir = {}", dir);
+			auto* proj = ProjectSettings::instance();
+			proj->setProjectRoot(path);
 		}		
 
 		ShaderInfo info;
@@ -25,20 +25,12 @@ protected:
 		String outputPath = Fmt("LocalTemp/Imported/{}", shaderFilename);
 		Directory::create(outputPath);
 
-		TempString code;
-		auto codeFilename = Fmt("{}/code.hlsl", outputPath);
-
 		{
 			ShaderParser parser;
 			parser.readFile(info, shaderFilename);
 
-			for (size_t i = 2; i < parser.line(); i++) {
-				code += "//\n";
-			}
-			auto remain = parser.getRemainSource();
-			code += remain;
-
-			File::writeFileIfChanged(codeFilename, code, true);
+			auto jsonFilename = Fmt("{}/info.json", outputPath);
+			JsonUtil::writeFile(jsonFilename, info, false);
 		}
 
 		{ // DX11
@@ -48,12 +40,12 @@ protected:
 
 				if (pass.vsFunc.size()) {
 					ShaderCompiler_DX11 c;
-					c.compile(passOutPath, ShaderStage::Vertex, codeFilename, pass.vsFunc);
+					c.compile(passOutPath, ShaderStageMask::Vertex, shaderFilename, pass.vsFunc);
 				}
 
 				if (pass.psFunc.size()) {
 					ShaderCompiler_DX11 c;
-					c.compile(passOutPath, ShaderStage::Pixel, codeFilename, pass.psFunc);
+					c.compile(passOutPath, ShaderStageMask::Pixel, shaderFilename, pass.psFunc);
 				}
 
 				passIndex++;

@@ -1,13 +1,14 @@
 #include "RenderContext_DX11.h"
 #include "Renderer_DX11.h"
 #include "RenderGpuBuffer_DX11.h"
+#include "Material_DX11.h"
 
 namespace sge {
 
 RenderContext_DX11::RenderContext_DX11(CreateDesc& desc) 
 	: Base(desc)
 {
-	_renderer = Renderer_DX11::current();
+	_renderer = Renderer_DX11::instance();
 
 	auto* win = static_cast<NativeUIWindow_Win32*>(desc.window);
 
@@ -60,16 +61,16 @@ void RenderContext_DX11::onCmd_DrawCall(RenderCommand_DrawCall& cmd) {
 		if (!indexBuffer) { SGE_ASSERT(false); return; }
 	}
 
-	_setTestShaders();
-
 	auto* ctx = _renderer->d3dDeviceContext();
+
+	if (cmd.materialPass) {
+		cmd.materialPass->bind(this, cmd.vertexLayout);
+	} else {
+		_setTestShaders(cmd.vertexLayout);
+	}
+
 	auto primitive = Util::getDxPrimitiveTopology(cmd.primitive);
 	ctx->IASetPrimitiveTopology(primitive);
-
-	auto* inputLayout = _getTestInputLayout(cmd.vertexLayout);
-	if (!inputLayout) { SGE_ASSERT(false); return; }
-
-	ctx->IASetInputLayout(inputLayout);
 
 	UINT stride = static_cast<UINT>(cmd.vertexLayout->stride);
 	UINT offset = 0;
@@ -94,7 +95,7 @@ void RenderContext_DX11::onCmd_SwapBuffers(RenderCommand_SwapBuffers& cmd) {
 }
 
 void RenderContext_DX11::_createRenderTarget() {
-	auto* renderer = Renderer_DX11::current();
+	auto* renderer = Renderer_DX11::instance();
 	auto* dev = renderer->d3dDevice();
 	HRESULT hr;
 
@@ -167,7 +168,7 @@ void RenderContext_DX11::onEndRender() {
 
 }
 
-void RenderContext_DX11::_setTestShaders() {
+void RenderContext_DX11::_setTestShaders(const VertexLayout* vertexLayout) {
 	HRESULT hr;
 	const wchar_t* shaderFile = L"Assets/Shaders/test.hlsl";
 
@@ -267,6 +268,10 @@ void RenderContext_DX11::_setTestShaders() {
 
 	ctx->VSSetShader(_testVertexShader, 0, 0);
 	ctx->PSSetShader(_testPixelShader,  0, 0);
+
+	auto* inputLayout = _getTestInputLayout(vertexLayout);
+	if (!inputLayout) { SGE_ASSERT(false); return; }
+	ctx->IASetInputLayout(inputLayout);
 }
 
 void RenderContext_DX11::onCommit(RenderCommandBuffer& cmdBuf) {
@@ -285,9 +290,9 @@ DX11_ID3DInputLayout* RenderContext_DX11::_getTestInputLayout(const VertexLayout
 
 	for (auto& e : src->elements) {
 		auto& dst = inputDesc.emplace_back();
-		auto semanticType			= Vertex_SemanticUtil::getType(e.semantic);
+		auto semanticType			= VertexSemanticUtil::getType(e.semantic);
 		dst.SemanticName			= Util::getDxSemanticName(semanticType);
-		dst.SemanticIndex			= Vertex_SemanticUtil::getIndex(e.semantic);
+		dst.SemanticIndex			= VertexSemanticUtil::getIndex(e.semantic);
 		dst.Format					= Util::getDxFormat(e.dataType);
 		dst.InputSlot				= 0;
 		dst.AlignedByteOffset		= e.offset;

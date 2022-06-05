@@ -19,7 +19,7 @@ public:
 //		SGE_DUMP_VAR(sizeof(Vertex_PosColorUv2));
 
 		Base::onCreate(desc);
-		auto* renderer = Renderer::current();
+		auto* renderer = Renderer::instance();
 
 		{
 			RenderContext::CreateDesc renderContextDesc;
@@ -27,9 +27,9 @@ public:
 			_renderContext = renderer->createContext(renderContextDesc);
 		}
 
-		//_material = renderer->createMaterial();
-		//_material.setShader("Assets/shaders/test.shader");
-		//_material.setParam("a", 10.0f);
+		auto shader = renderer->createShader("Assets/Shaders/test.shader");
+		_material = renderer->createMaterial();
+		_material->setShader(shader);
 
 		EditMesh editMesh;
 
@@ -56,7 +56,7 @@ public:
 
 		_renderMesh.create(editMesh);
 
-		VertexLayoutManager::current()->getLayout(Vertex_Pos::kType);
+		VertexLayoutManager::instance()->getLayout(Vertex_Pos::kType);
 	}
 
 	virtual void onCloseButton() override {
@@ -67,13 +67,19 @@ public:
 		Base::onDraw();
 		if (!_renderContext) return;
 
+		auto time = GetTickCount() * 0.001f;
+		auto s = abs(sin(time * 2));
+
+		_material->setParam("test_float", s * 0.5f);
+		_material->setParam("test_color", Color4f(s, 0, 0, 1));
+
 		_renderContext->setFrameBufferSize(clientRect().size);
 
 		_renderContext->beginRender();
 
 		_cmdBuf.reset();
 		_cmdBuf.clearFrameBuffers()->setColor({0, 0, 0.2f, 1});
-		_cmdBuf.drawMesh(SGE_LOC, _renderMesh);//, _material);
+		_cmdBuf.drawMesh(SGE_LOC, _renderMesh, _material);
 		_cmdBuf.swapBuffers();
 		
 		_renderContext->commit(_cmdBuf);
@@ -82,7 +88,7 @@ public:
 		drawNeeded();
 	}
 
-//	SPtr<Material> _material;
+	SPtr<Material> _material;
 
 	SPtr<RenderContext>	_renderContext;
 	RenderCommandBuffer _cmdBuf;
@@ -97,10 +103,9 @@ public:
 			String file = getExecutableFilename();
 			String path = FilePath::dirname(file);
 			path.append("/../../../../../../examples/Test101");
-			Directory::setCurrent(path);
 
-			auto dir = Directory::getCurrent();
-			SGE_LOG("dir = {}", dir);
+			auto* proj = ProjectSettings::instance();
+			proj->setProjectRoot(path);
 		}
 
 		Base::onCreate(desc);

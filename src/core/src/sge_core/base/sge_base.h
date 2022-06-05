@@ -45,7 +45,11 @@
 #include <EASTL/shared_ptr.h>
 #include <EASTL/weak_ptr.h>
 
+#include <nlohmann/json.hpp>
+
 #include "sge_macro.h"
+
+using Json = nlohmann::json;
 
 //==== EASTL ====
 
@@ -114,6 +118,7 @@ template<class T> using Vector = eastl::vector<T>;
 
 template<class KEY, class VALUE> using Map = eastl::map<KEY, VALUE>;
 template<class KEY, class VALUE> using VectorMap = eastl::vector_map<KEY, VALUE>;
+template<class VALUE> using StringMap = eastl::string_map<VALUE>;
 
 template<class T> using Opt = eastl::optional<T>;
 
@@ -139,10 +144,15 @@ public:
 	StringT(const T* begin, const T* end) : Base(begin, end) {}
 	StringT(StrViewT<T> view) : Base(view.data(), view.size()) {}
 	StringT(StringT&& str) : Base(std::move(str)) {}
+	StringT(const T* sz) : Base(sz) {}
 
 	template<class R> void operator=(R&& r) { Base::operator=(SGE_FORWARD(r)); }
 
 	void operator+=(StrViewT<T> v) { Base::append(v.begin(), v.end()); }
+
+	template<size_t N>
+	void operator+=(const StringT<T, N>& v) { Base::append(v.begin(), v.end()); }
+
 	template<class R> void operator+=(const R& r) { Base::operator+=(r); }
 
 	StrViewT<T>	view() const { return StrViewT<T>(data(), size()); }
@@ -159,6 +169,10 @@ using StringW = StringW_<0>;
 
 using StrView		= StrViewA;
 using String		= StringA;
+
+inline StrView StrView_c_str(const char* s) {
+	return s ? StrView(s, strlen(s)) : StrView();
+}
 
 inline StrView StrView_make(ByteSpan s) {
 	return StrView(reinterpret_cast<const char*>(s.data()), s.size());
@@ -202,10 +216,7 @@ class NonCopyable {
 public:
 	NonCopyable() = default;
 private:
-	NonCopyable(NonCopyable&&) = delete;
 	NonCopyable(const NonCopyable&) = delete;
-
-	void operator=(NonCopyable&&) = delete;
 	void operator=(const NonCopyable&) = delete;
 };
 

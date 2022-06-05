@@ -43,7 +43,7 @@ bool Lexer::nextChar() {
 
 bool Lexer::nextToken() {
 	if (!_nextToken()) return false;
-	SGE_DUMP_VAR(_line, _token);
+//	SGE_DUMP_VAR(_line, _token);
 	return true;
 }
 
@@ -92,6 +92,7 @@ void Lexer::_error(StrView msg) {
 			if (c == '\n') { tmp += c;		continue; }
 			if (c == '\t') { tmp += "----";	continue; }
 			tmp += '-';
+			i++;
 		}
 		tmp += "^^^\n";
 	}
@@ -106,6 +107,11 @@ bool Lexer::_nextToken() {
 	for (;;) {
 		trimSpaces();
 		if (!_ch) return false;
+
+		if (_ch == '#') {
+			_parseCommentSingleLine();
+			continue;
+		}
 
 		if (_ch == '_' || isAlpha(_ch)) {
 			return _parseIdentifier();
@@ -134,7 +140,7 @@ bool Lexer::_nextToken() {
 			}
 
 			_token.type = TokenType::Operator;
-			_token.str += _ch;
+			_token.str = '/';
 			return true;
 		}
 
@@ -237,7 +243,7 @@ void Lexer::_parseCommentBlock() {
 }
 
 void Lexer::_parseCommentSingleLine() {
-	nextChar();			
+	nextChar();
 	for(;;) {
 		if (!_ch) return;
 		if (_ch == '\n') {
