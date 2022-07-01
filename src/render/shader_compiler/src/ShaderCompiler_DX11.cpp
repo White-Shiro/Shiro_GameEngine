@@ -98,6 +98,11 @@ void ShaderCompiler_DX11::_reflect_inputs(ShaderStageInfo& outInfo, ID3D11Shader
 
 		dst.semantic = VertexSemanticUtil::make(semanticType, static_cast<VertexSemanticIndex>(paramDesc.SemanticIndex));
 
+		TempString  semantic = enumStr(dst.semantic);
+		if (!semantic.size()) {
+			throw SGE_ERROR("unsupported sematic name {}", paramDesc.SemanticName);
+		}
+
 		TempString dataType;
 
 		switch (paramDesc.ComponentType) {
@@ -169,7 +174,7 @@ void ShaderCompiler_DX11::_reflect_constBuffers(ShaderStageInfo& outInfo, ID3D11
 					case D3D_SVT_BOOL:	dataType.append("Bool");	break;
 					case D3D_SVT_INT:	dataType.append("Int32");	break;
 					case D3D_SVT_UINT:	dataType.append("UInt32");	break;
-					case D3D_SVT_UINT8:	dataType.append("Uint8");	break;
+					case D3D_SVT_UINT8:	dataType.append("UInt8");	break;
 					case D3D_SVT_FLOAT: dataType.append("Float32");	break;
 					case D3D_SVT_DOUBLE:dataType.append("Float64");	break;
 					default: throw SGE_ERROR("unsupported type {}", varType.Type);
@@ -177,9 +182,17 @@ void ShaderCompiler_DX11::_reflect_constBuffers(ShaderStageInfo& outInfo, ID3D11
 
 				switch (varType.Class) {
 					case D3D_SVC_SCALAR: break;
-					case D3D_SVC_VECTOR:			FmtTo(dataType, "x{}",		varType.Columns); break;
-					case D3D_SVC_MATRIX_COLUMNS:	FmtTo(dataType, "_{}x{}",	varType.Rows, varType.Columns); break;
-					case D3D_SVC_MATRIX_ROWS:		FmtTo(dataType, "_{}x{}",	varType.Rows, varType.Columns); break;
+					case D3D_SVC_VECTOR:
+						FmtTo(dataType, "x{}",	varType.Columns);
+						break;
+					case D3D_SVC_MATRIX_COLUMNS:
+						FmtTo(dataType, "_{}x{}", varType.Rows, varType.Columns); 
+						outVar.rowMajor = false;
+						break;
+					case D3D_SVC_MATRIX_ROWS:
+						FmtTo(dataType, "_{}x{}", varType.Rows, varType.Columns); 
+						outVar.rowMajor = true;
+						break;
 					default: throw SGE_ERROR("unsupported Class {}", varType.Class);
 				}
 

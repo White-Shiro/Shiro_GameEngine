@@ -103,7 +103,7 @@ void BinSerializer::_io_vary_unsigned(T& value) {
 template<class U, class T> SGE_INLINE
 void BinSerializer::_io_vary_signed(T& value) {
 // ZigZag encoding - https://developers.google.com/protocol-buffers/docs/encoding
-	static_assert(sizeof(U) == sizeof(T));
+	static_assert(sizeof(U) == sizeof(T),"");
 	U tmp = static_cast<U>( ( value << 1 ) ^ ( value >> (sizeof(T)*8-1) ) );
 	_io_vary_unsigned(tmp);
 }

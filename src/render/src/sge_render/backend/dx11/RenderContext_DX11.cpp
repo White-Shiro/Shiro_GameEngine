@@ -63,8 +63,10 @@ void RenderContext_DX11::onCmd_DrawCall(RenderCommand_DrawCall& cmd) {
 
 	auto* ctx = _renderer->d3dDeviceContext();
 
-	if (cmd.materialPass) {
-		cmd.materialPass->bind(this, cmd.vertexLayout);
+	_setTestDefaultRenderState();
+
+	if (auto* pass = cmd.getMaterialPass()) {
+		pass->bind(this, cmd.vertexLayout);
 	} else {
 		_setTestShaders(cmd.vertexLayout);
 	}
@@ -136,6 +138,7 @@ void RenderContext_DX11::_createRenderTarget() {
 
 void RenderContext_DX11::onSetFrameBufferSize(Vec2f newSize) {
 	_renderTargetView.reset(nullptr); // release buffer and render target view before resize
+	_depthStencilView.reset(nullptr);
 
 	auto hr = _swapChain->ResizeBuffers(0
 								, static_cast<UINT>(Math::max(0.0f, newSize.x))
@@ -152,8 +155,7 @@ void RenderContext_DX11::onBeginRender() {
 	}
 
 	DX11_ID3DRenderTargetView* rt[] = { _renderTargetView };
-//	ctx->OMSetRenderTargets(1, rt, _depthStencilView);
-	ctx->OMSetRenderTargets(1, rt, nullptr);
+	ctx->OMSetRenderTargets(1, rt, _depthStencilView);
 
 	D3D11_VIEWPORT viewport = {};
 	viewport.TopLeftX	 = 0;
@@ -197,15 +199,28 @@ void RenderContext_DX11::_setTestShaders(const VertexLayout* vertexLayout) {
 		Util::throwIfError(hr);
 	}
 
+	ctx->VSSetShader(_testVertexShader, 0, 0);
+	ctx->PSSetShader(_testPixelShader,  0, 0);
+
+	auto* inputLayout = _getTestInputLayout(vertexLayout);
+	if (!inputLayout) { SGE_ASSERT(false); return; }
+	ctx->IASetInputLayout(inputLayout);
+}
+
+void RenderContext_DX11::_setTestDefaultRenderState() {
+	auto* dev = _renderer->d3dDevice();
+	auto* ctx = _renderer->d3dDeviceContext();
+
+	HRESULT hr;
 	if (!_testRasterizerState) {
 		D3D11_RASTERIZER_DESC rasterDesc = {};
 		rasterDesc.AntialiasedLineEnable = true;
-		rasterDesc.CullMode = D3D11_CULL_NONE;
+		rasterDesc.CullMode = D3D11_CULL_BACK;
 		rasterDesc.DepthBias = 0;
 		rasterDesc.DepthBiasClamp = 0.0f;
 		rasterDesc.DepthClipEnable = true;
 
-		bool wireframe = true;
+		bool wireframe = false;
 		rasterDesc.FillMode = wireframe ? D3D11_FILL_WIREFRAME : D3D11_FILL_SOLID;
 
 		rasterDesc.FrontCounterClockwise = true;
@@ -219,15 +234,18 @@ void RenderContext_DX11::_setTestShaders(const VertexLayout* vertexLayout) {
 
 	if (!_testDepthStencilState) {
 		D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
-		bool depthTest = false;
+
+		bool depthTest = true;
 		if (depthTest) {
 			depthStencilDesc.DepthEnable	= true;
-			depthStencilDesc.DepthFunc		= D3D11_COMPARISON_LESS;
+			depthStencilDesc.DepthFunc		= D3D11_COMPARISON_LESS_EQUAL;
+			depthStencilDesc.DepthWriteMask	= D3D11_DEPTH_WRITE_MASK_ALL;
 		} else {
 			depthStencilDesc.DepthEnable	= false;
+			depthStencilDesc.DepthFunc		= D3D11_COMPARISON_ALWAYS;
+			depthStencilDesc.DepthWriteMask	= D3D11_DEPTH_WRITE_MASK_ZERO;
 		}
 
-		depthStencilDesc.DepthWriteMask		= D3D11_DEPTH_WRITE_MASK_ALL;
 		depthStencilDesc.StencilEnable		= false;
 		depthStencilDesc.StencilReadMask	= 0xFF;
 		depthStencilDesc.StencilWriteMask	= 0xFF;
@@ -265,13 +283,6 @@ void RenderContext_DX11::_setTestShaders(const VertexLayout* vertexLayout) {
 	
 	Color4f blendColor(1,1,1,1);
 	ctx->OMSetBlendState(_testBlendState, blendColor.data, 0xffffffff);
-
-	ctx->VSSetShader(_testVertexShader, 0, 0);
-	ctx->PSSetShader(_testPixelShader,  0, 0);
-
-	auto* inputLayout = _getTestInputLayout(vertexLayout);
-	if (!inputLayout) { SGE_ASSERT(false); return; }
-	ctx->IASetInputLayout(inputLayout);
 }
 
 void RenderContext_DX11::onCommit(RenderCommandBuffer& cmdBuf) {
