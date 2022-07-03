@@ -30,6 +30,11 @@ void RenderCommandBuffer::drawSubMesh(const SrcLoc& debugLoc, const RenderSubMes
 		cmd->indexBuffer		= subMesh.indexBuffer();
 		cmd->indexType			= subMesh.indexType();
 		cmd->indexCount			= subMesh.indexCount();
+
+		//cmd->rasterizerState	= subMesh.
+		//cmd->blendState		= 
+		//cmd->
+
 	}
 }
 

@@ -3,6 +3,7 @@
 #include <sge_render/vertex/Vertex.h>
 #include <sge_render/buffer/RenderGpuBuffer.h>
 #include <sge_render/shader/Material.h>
+#include <sge_render/RenderState.h>
 
 namespace sge {
 
@@ -71,6 +72,11 @@ public:
 	size_t					materialPassIndex = 0;
 
 	MaterialPass*			getMaterialPass() { return material ? material->getPass(materialPassIndex) : nullptr; }
+
+	//TODO
+	RasterizerState*		getRasterizerState() {}
+	DepthStencilState*		getDepthStencilState(){}
+	BlendState*				getBlendState() {}
 
 	size_t vertexCount = 0;
 	size_t indexCount = 0;

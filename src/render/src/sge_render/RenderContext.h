@@ -1,6 +1,7 @@
 #pragma once
 
 #include "command/RenderCommand.h"
+#include "RenderState.h"
 
 namespace sge {
 

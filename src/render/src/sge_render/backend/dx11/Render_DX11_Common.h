@@ -14,6 +14,7 @@
 #include <sge_render/Render_Common.h>
 #include <sge_render/vertex/Vertex.h>
 #include <sge_render/shader/Shader.h>
+#include <sge_render/RenderState.h>
 
 namespace sge {
 
@@ -63,6 +64,8 @@ struct DX11Util {
 
 	static D3D11_PRIMITIVE_TOPOLOGY	getDxPrimitiveTopology	(RenderPrimitiveType t);
 	static DXGI_FORMAT				getDxFormat				(RenderDataType v);
+	static D3D11_FILL_MODE			getDxFillMode			(RenderFillMode t);
+	static D3D11_CULL_MODE			getDxCullMode			(RenderCullMode t);
 
 	static const char*				getDxSemanticName		(VertexSemanticType t);
 	static VertexSemanticType		parseDxSemanticName		(StrView s);
@@ -211,6 +214,30 @@ DXGI_FORMAT DX11Util::getDxFormat(RenderDataType v) {
 		case SRC::Float32x4:	return DXGI_FORMAT_R32G32B32A32_FLOAT; break;
 	//---
 		default: throw SGE_ERROR("unsupported RenderDataType");
+	}
+}
+
+inline
+D3D11_FILL_MODE DX11Util::getDxFillMode(RenderFillMode t) {
+	using SRC = RenderFillMode;
+
+	switch (t) {
+		case SRC::WireFrame:	return D3D11_FILL_WIREFRAME;	break;
+		case SRC::Solid:		return D3D11_FILL_SOLID;		break;
+		default: throw SGE_ERROR("unsupported FillMode");
+	}
+}
+
+inline
+D3D11_CULL_MODE DX11Util::getDxCullMode(RenderCullMode t) {
+	using SRC = RenderCullMode;
+
+	switch (t) {
+		//Should I throw if CULL MODE is none?
+		case SRC::None:		return D3D11_CULL_NONE;		break;
+		case SRC::Front:	return D3D11_CULL_FRONT;	break;
+		case SRC::Back:		return D3D11_CULL_BACK;		break;
+		default: throw SGE_ERROR("unsupported CullMode");
 	}
 }
 

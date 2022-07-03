@@ -153,7 +153,7 @@ public:
 			proj->setProjectRoot(path);
 		}
 
-	#if 1 // for quick testing
+	#if 0 // for quick testing
 		{
 			SHELLEXECUTEINFO ShExecInfo = {0};
 			ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
@@ -181,7 +181,7 @@ public:
 		NativeUIWindow::CreateDesc winDesc;
 		winDesc.isMainWindow = true;
 		_mainWin.create(winDesc);
-		_mainWin.setWindowTitle("SGE Editor");
+		_mainWin.setWindowTitle("SGE Editor_Shiro");
 
 	}
 

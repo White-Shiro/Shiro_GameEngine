@@ -46,7 +46,7 @@ private:
 		}
 
 		Span<ConstBuffer> constBuffers() { return _constBuffers; }
-		Shader_DX11::MyPixelStage*	shaderStage() { return static_cast<Shader_DX11::MyPixelStage*>(_shaderStage); }
+		Shader_DX11::MyPixelStage*	shaderStage() const { return static_cast<Shader_DX11::MyPixelStage*>(_shaderStage); }
 	};
 
 	struct MyPass : public Pass {

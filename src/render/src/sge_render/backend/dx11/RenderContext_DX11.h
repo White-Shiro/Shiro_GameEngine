@@ -29,8 +29,8 @@ protected:
 	ComPtr<DX11_ID3DVertexShader>		_testVertexShader;
 	ComPtr<DX11_ID3DBlob>				_testVertexShaderBytecode;
 	ComPtr<DX11_ID3DPixelShader>		_testPixelShader;
-	ComPtr<DX11_ID3DRasterizerState>	_testRasterizerState;
 
+	ComPtr<DX11_ID3DRasterizerState>	_testRasterizerState;
 	ComPtr<DX11_ID3DDepthStencilState>	_testDepthStencilState;
 	ComPtr<DX11_ID3DBlendState>			_testBlendState;
 
@@ -46,6 +46,7 @@ protected:
 	void _setTestShaders(const VertexLayout* vertexLayout);
 
 	void _setTestDefaultRenderState();
+	void _setRenderState();
 
 	virtual void onCommit(RenderCommandBuffer& cmdBuf);
 };

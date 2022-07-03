@@ -78,6 +78,9 @@ void ShaderCompiler_DX11::_reflect(StrView outFilename, ByteSpan bytecode, Shade
 	{
 		auto jsonFilename = Fmt("{}.json", outFilename);
 		JsonUtil::writeFileIfChanged(jsonFilename, outInfo, false);
+
+
+		
 	}
 }
 
@@ -255,7 +258,6 @@ void ShaderCompiler_DX11::_reflect_samplers(ShaderStageInfo& outInfo, ID3D11Shad
 		outSampler.bindPoint	= static_cast<i16>(resDesc.BindPoint);
 		outSampler.bindCount	= static_cast<i16>(resDesc.BindCount);
 	}
-
 }
 
 }
