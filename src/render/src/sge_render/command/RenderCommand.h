@@ -74,9 +74,9 @@ public:
 	MaterialPass*			getMaterialPass() { return material ? material->getPass(materialPassIndex) : nullptr; }
 
 	//TODO
-	RasterizerState*		getRasterizerState() {}
-	DepthStencilState*		getDepthStencilState(){}
-	BlendState*				getBlendState() {}
+	RenderState_Rasterizer*		getRasterizerState() {}
+	RenderState_DepthStencil*		getDepthStencilState(){}
+	RenderState_Blend*				getBlendState() {}
 
 	size_t vertexCount = 0;
 	size_t indexCount = 0;

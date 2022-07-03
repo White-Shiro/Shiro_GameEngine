@@ -153,7 +153,7 @@ public:
 			proj->setProjectRoot(path);
 		}
 
-	#if 0 // for quick testing
+	#if 1 // for quick testing
 		{
 			SHELLEXECUTEINFO ShExecInfo = {0};
 			ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);

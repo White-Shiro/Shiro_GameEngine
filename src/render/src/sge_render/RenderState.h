@@ -15,7 +15,7 @@ enum class RenderFillMode {
 };
 
 enum class RenderCullMode {
-	None,
+	None, //RenderBothSide?
 	Front,
 	Back,
 };
@@ -100,7 +100,7 @@ public:
 	virtual RenderStateType getRenderStateType() = 0;
 };
 
-struct RasterizerState : RenderState {
+struct RenderState_Rasterizer : RenderState {
 public:
 	RenderFillMode	fillMode;
 	RenderCullMode	cullMode;
@@ -116,7 +116,7 @@ public:
 	RenderStateType getRenderStateType() override { return RenderStateType::Rasterizer; }
 };
 
-struct DepthStencilState : RenderState {
+struct RenderState_DepthStencil : RenderState {
 public:
 	bool						depthEnable;
 	DepthWriteMask				depthWriteMask;
@@ -130,10 +130,11 @@ public:
 	RenderStateType getRenderStateType() override { return RenderStateType::DepthStencil; }
 };
 
-struct BlendState : public RenderState {
+struct RenderState_Blend : public RenderState {
 public:
 	bool				alphaToCoverageEnable;
 	bool				independentBlendEnable;
+	//Struct
 	RenderTargetBlend	renderTarget[8];
 
 	RenderStateType getRenderStateType() override { return RenderStateType::Blend; }
